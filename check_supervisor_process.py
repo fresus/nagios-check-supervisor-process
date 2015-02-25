@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright (C) 2015 - Jesús A. Rodríguez
 
 # This program is free software: you can redistribute it and/or modify
@@ -24,14 +25,14 @@ CRITICAL = 2
 UNKNOWN = 3
 
 supervisor_states = {
-    'RUNNING': 'OK',
-    'STOPPED': 'WARNING',
-    'STOPPING': 'WARNING',
-    'STARTING': 'WARNING',
-    'EXITED': 'CRITICAL',
-    'BACKOFF': 'CRITICAL',
-    'FATAL': 'CRITICAL',
-    'UNKNOWN': 'CRITICAL'
+    'RUNNING': OK,
+    'STOPPED': WARNING,
+    'STOPPING': WARNING,
+    'STARTING': WARNING,
+    'EXITED': CRITICAL,
+    'BACKOFF': CRITICAL,
+    'FATAL': CRITICAL,
+    'UNKNOWN': CRITICAL
 }
 
 warning_levels = []
@@ -58,17 +59,17 @@ except:
 
 for process in process_info:
     if opts.process:
-        if process['name'].startswith(opts.process) and supervisor_states[process['statename']] != 'OK':
+        if process['name'].startswith(opts.process) and supervisor_states[process['statename']] != OK:
             not_ok_processes.setdefault(process['statename'],set()).add(process['name'].split('_')[0])
     else:
-        if supervisor_states[process['statename']] != 'OK':
+        if supervisor_states[process['statename']] != OK:
             not_ok_processes.setdefault(process['statename'],set()).add(process['name'].split('_')[0])
 
 if len(not_ok_processes) > 0:
     warning_levels = [ supervisor_states[state] for state in not_ok_processes ]
-    if 'CRITICAL' in warning_levels:
+    if CRITICAL in warning_levels:
         exit_code = CRITICAL
-    elif 'WARNING' in warning_levels:
+    elif WARNING in warning_levels:
         exit_code = WARNING
     else:
         exit_code = UNKNOWN
