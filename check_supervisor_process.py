@@ -57,13 +57,25 @@ except:
     print 'Could not get process info'
     sys.exit(UNKNOWN)
 
-for process in process_info:
-    if opts.process:
-        if process['name'].startswith(opts.process) and supervisor_states[process['statename']] != OK:
-            not_ok_processes.setdefault(process['statename'],set()).add(process['name'].split('_')[0])
+exit_code = UNKNOWN
+exit_message = 'UNKNOWN'
+
+if opts.process:
+    if opts.process not in [ process['name'].split('_')[0] for process in process_info ]:
+        exit_code = UNKNOWN
+        exit_message = "Process '%s' don't exist" % opts.process
     else:
+        for process in process_info:
+            if process['name'].split('_')[0] == opts.process and supervisor_states[process['statename']] != OK:
+                not_ok_processes.setdefault(process['statename'],set()).add(process['name'].split('_')[0])
+        exit_code = OK
+        exit_message = "All processes OK"
+else:
+    for process in process_info:
         if supervisor_states[process['statename']] != OK:
             not_ok_processes.setdefault(process['statename'],set()).add(process['name'].split('_')[0])
+    exit_code = OK
+    exit_message = "All processes OK"
 
 if len(not_ok_processes) > 0:
     warning_levels = [ supervisor_states[state] for state in not_ok_processes ]
@@ -74,9 +86,6 @@ if len(not_ok_processes) > 0:
     else:
         exit_code = UNKNOWN
     exit_message = '; '.join("%s: %s" % (statename, ', '.join(name for name in names)) for (statename, names) in not_ok_processes.iteritems())
-else:
-    exit_code = OK
-    exit_message = 'All processes OK'
 
 print exit_message
 sys.exit(exit_code)
